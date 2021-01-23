@@ -1,5 +1,4 @@
 FROM alpine:latest
-LABEL maintainer="zhaow.km@gmail.com"
 
 ENV \
     # sets the number of tor instances
