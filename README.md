@@ -4,21 +4,23 @@
 
 This Docker image provides one HTTP proxy endpoint with many IP addresses for use scenarios like crawling.
 
-Technically, it has an HAProxy sitting in front of multiple pairs of Privoxy and Tor client. The HAProxy dispatches the incoming requests
-to the Privoxy with a round-robin strategy. 
+![Screenshot](images/screenshot_1.gif)
+
+Behind the scene, it has an HAProxy sitting in front of multiple pairs of Privoxy-Tor. The HAProxy dispatches the incoming
+requests to the Privoxy instances with a round-robin strategy. 
 
 ## Usage
 
 ### Simple case
 ```shell
-docker run --rm -p 3128:3128 zhaowde/rotating-tor-http-proxy
+docker run --rm -it -p 3128:3128 zhaowde/rotating-tor-http-proxy
 ```
 At the host, `127.0.0.1:3128` is the HTTP/HTTPS proxy address.
 
 ### Moreover
 
 ```shell
-docker run --rm -p 3128:3128 -p 4444:4444 -e "TOR_INSTANCES=5" -e "TOR_REBUILD_INTERVAL=3600" zhaowde/rotating-tor-http-proxy
+docker run --rm -it -p 3128:3128 -p 4444:4444 -e "TOR_INSTANCES=5" -e "TOR_REBUILD_INTERVAL=3600" zhaowde/rotating-tor-http-proxy
 ```
 
 Port `4444/TCP` can be mapped to the host if HAProxy stats information is needed. With `docker run -p 4444:4444`, the HAProxy statistics
@@ -35,7 +37,7 @@ seconds, while it can be set up any number greater than 600 seconds.
 ### Test the proxy
 
 ```shell
-while :; do ; curl -sx localhost:3128 ifconfig.me; echo ""; sleep 2; done
+while :; do curl -sx localhost:3128 ifconfig.me; echo ""; sleep 2; done
 ```
 
 ## Credit
@@ -54,6 +56,7 @@ Remarkably:
 ## Bill-of-Material
 
 - alpine 3.12.0
+- bash-5.0.17
 - curl-7.69.1
 - haproxy-2.1.11
 - privoxy-3.0.28
