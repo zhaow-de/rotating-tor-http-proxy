@@ -36,7 +36,6 @@ jobs:
         id: test-proxy
         shell: bash
         run: |
-          set -x
           IP1=$(curl -sx localhost:3128 ifconfig.me)
           sleep 2
           IP2=$(curl -sx localhost:3128 ifconfig.me)
@@ -52,7 +51,6 @@ jobs:
         if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
         shell: bash
         run: |
-          set -x
           cat ${GITHUB_WORKSPACE}/README.md |tr '\n' '\r' |sed -r "s/(.*<!---\ BOM-starts\ --->\r).*/\1/" |tr '\r' '\n' > ${GITHUB_WORKSPACE}/~README.md
           for i in ${{ steps.compare-bom.outputs.new-bom-data }}; do
              echo "- ${i}" >> ${GITHUB_WORKSPACE}/~README.md
@@ -67,6 +65,7 @@ jobs:
           commit_message: auto upgrade triggered by BoM changes
           skip_fetch: true
       - name: Bump version and push tag
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
         id: tag_version
         uses: mathieudutour/github-tag-action@v5.1
         with:
@@ -74,6 +73,7 @@ jobs:
           default_bump: patch
           tag_prefix: ''
       - name: Create a release
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
