@@ -1,4 +1,6 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/zhaowde/rotating-tor-http-proxy.svg)](https://hub.docker.com/r/zhaowde/rotating-tor-http-proxy/)
+![Docker Image Version (latest semver)](https://img.shields.io/docker/v/zhaowde/rotating-tor-http-proxy)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/zhaow-de/rotating-tor-http-proxy/auto-upgrade)
 
 # rotating-tor-http-proxy
 
@@ -55,6 +57,8 @@ Remarkably:
 
 ## Bill-of-Material
 
+<!--- Do not manually modify anything below this line! --->
+<!--- BOM-starts --->
 - alpine 3.12.0
 - bash-5.0.17
 - curl-7.69.1
@@ -62,3 +66,4 @@ Remarkably:
 - privoxy-3.0.28
 - sed-4.8
 - tor-0.4.3.7
+<!--- BOM-ends. Document ends here too --->

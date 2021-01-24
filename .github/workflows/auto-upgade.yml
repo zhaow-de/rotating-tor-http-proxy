@@ -1,0 +1,89 @@
+name: auto-upgrade
+
+on:
+  schedule:
+    - cron: '30 7,19 * * *'
+  workflow_dispatch:
+
+jobs:
+  auto-upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+        with:
+          ref: main
+      - name: Build Docker image
+        run: docker build --tag local-image .
+      - name: Compare BoM
+        id: compare-bom
+        shell: bash
+        run: |
+          CURRENT_BOM="$(cat ${GITHUB_WORKSPACE}/.github/bom.current)"
+          NEW_BOM="$(docker run --rm local-image /bom.sh)"
+          echo "Current BOM: ${CURRENT_BOM}"
+          echo "New BOM: ${NEW_BOM}"
+          echo "::set-output name=compare-bom-result::$(if [ "${CURRENT_BOM}" = "${NEW_BOM}" ]; then echo NOCHANGE; else echo CHANGED; fi)"
+          echo "::set-output name=new-bom-data::${NEW_BOM}"
+      - name: Run proxy server
+        if: ${{ steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
+        id: run-image
+        shell: bash
+        # 90 seconds should be long enough to build 3 circuits
+        run: docker run -d --rm --name test-proxy -p 3128:3128 -e TOR_INSTANCES=3 local-image && sleep 90
+      - name: Test the proxy
+        if: ${{ steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.run-image.outcome != 'skipped' }}
+        id: test-proxy
+        shell: bash
+        run: |
+          set -x
+          IP1=$(curl -sx localhost:3128 ifconfig.me)
+          sleep 2
+          IP2=$(curl -sx localhost:3128 ifconfig.me)
+          sleep 2
+          IP3=$(curl -sx localhost:3128 ifconfig.me)
+          # tricky expression here for a simple goal: (1) none of the 3x IP shall be empty, and (2) 3x IP shall not have the same value
+          [[ "${IP1}" != "${IP2}" || "${IP2}" != "${IP3}" || "${IP1}" != "${IP3}" ]] && [[ "${IP1}" != "" ]] && [[ "${IP2}" != "" ]] && [[ "${IP3}" != "" ]] || exit 1
+      - name: Update BOM record
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
+        shell: bash
+        run: echo "${{ steps.compare-bom.outputs.new-bom-data }}" > ${GITHUB_WORKSPACE}/.github/bom.current
+      - name: Update README
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -x
+          cat ${GITHUB_WORKSPACE}/README.md |tr '\n' '\r' |sed -r "s/(.*<!---\ BOM-starts\ --->\r).*/\1/" |tr '\r' '\n' > ${GITHUB_WORKSPACE}/README.md
+          for i in ${{ steps.compare-bom.outputs.new-bom-data }}; do
+             echo "- ${i}" >> ${GITHUB_WORKSPACE}/README.md
+          done
+          echo "<!--- BOM-ends. Document ends here too --->" >> ${GITHUB_WORKSPACE}/README.md
+
+      - name: Commit changes
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: auto upgrade triggered by BoM changes
+          skip_fetch: true
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v5.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: ''
+      - name: Create a release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          release_name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+      - name: Merge (back) to develop branch
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
+        uses: everlytic/branch-merge@1.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_ref: main
+          target_branch: development
