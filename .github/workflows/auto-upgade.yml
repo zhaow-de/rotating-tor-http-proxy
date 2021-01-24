@@ -53,11 +53,12 @@ jobs:
         shell: bash
         run: |
           set -x
-          cat ${GITHUB_WORKSPACE}/README.md |tr '\n' '\r' |sed -r "s/(.*<!---\ BOM-starts\ --->\r).*/\1/" |tr '\r' '\n' > ${GITHUB_WORKSPACE}/README.md
+          cat ${GITHUB_WORKSPACE}/README.md |tr '\n' '\r' |sed -r "s/(.*<!---\ BOM-starts\ --->\r).*/\1/" |tr '\r' '\n' > ${GITHUB_WORKSPACE}/~README.md
           for i in ${{ steps.compare-bom.outputs.new-bom-data }}; do
-             echo "- ${i}" >> ${GITHUB_WORKSPACE}/README.md
+             echo "- ${i}" >> ${GITHUB_WORKSPACE}/~README.md
           done
-          echo "<!--- BOM-ends. Document ends here too --->" >> ${GITHUB_WORKSPACE}/README.md
+          echo "<!--- BOM-ends. Document ends here too --->" >> ${GITHUB_WORKSPACE}/~README.md
+          mv -f ${GITHUB_WORKSPACE}/~README.md ${GITHUB_WORKSPACE}/README.md
 
       - name: Commit changes
         if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
