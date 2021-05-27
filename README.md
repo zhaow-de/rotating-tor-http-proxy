@@ -63,7 +63,7 @@ Remarkably:
 <!--- BOM-starts --->
 - alpine-3.13.5
 - bash-5.1.0
-- curl-7.76.1
+- curl-7.77.0
 - haproxy-2.2.14
 - privoxy-3.0.32
 - sed-4.8
