@@ -61,11 +61,11 @@ Remarkably:
 
 <!--- Do not manually modify anything below this line! --->
 <!--- BOM-starts --->
-- alpine-3.13.5
-- bash-5.1.0
+- alpine-3.14.0
+- bash-5.1.4
 - curl-7.77.0
-- haproxy-2.2.14
+- haproxy-2.4.0
 - privoxy-3.0.32
 - sed-4.8
-- tor-0.4.4.8
+- tor-0.4.5.8
 <!--- BOM-ends. Document ends here too --->
