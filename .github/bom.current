@@ -1,1 +1,1 @@
-alpine-3.14.3 bash-5.1.4 curl-7.79.1 haproxy-2.4.4 privoxy-3.0.32 sed-4.8 tor-0.4.5.10
+alpine-3.15.0 bash-5.1.8 curl-7.80.0 haproxy-2.4.8 privoxy-3.0.32 sed-4.8 tor-0.4.6.7
