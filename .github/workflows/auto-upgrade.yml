@@ -56,6 +56,7 @@ jobs:
         id: tag_version_dryrun
         uses: mathieudutour/github-tag-action@v6.1
         with:
+          dry_run: true
           # align the parameters here with the real run below
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
