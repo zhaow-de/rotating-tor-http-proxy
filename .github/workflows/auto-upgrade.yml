@@ -99,3 +99,14 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           source_ref: main
           target_branch: develop
+      - name: Update the Docker Hub description
+        # For non-paid account, DockerHub has disabled the auto-build function, which is the prerequisite for
+        # auto-description update.
+        # We add this step here to update the description "manually."
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: zhaowde/rotating-tor-http-proxy
+          short-description: ${{ github.event.repository.description }}
