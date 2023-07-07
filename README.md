@@ -1,6 +1,6 @@
 ![GitHub](https://img.shields.io/github/license/zhaow-de/rotating-tor-http-proxy)
 ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/zhaowde/rotating-tor-http-proxy?sort=semver)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/zhaow-de/rotating-tor-http-proxy/auto-upgrade.yml?branch=main)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/zhaow-de/rotating-tor-http-proxy/auto-upgrade.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/zhaowde/rotating-tor-http-proxy.svg)](https://hub.docker.com/r/zhaowde/rotating-tor-http-proxy/)
 ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/zhaowde/rotating-tor-http-proxy?sort=semver)
 
@@ -41,7 +41,7 @@ Environment variable `TOR_INSTANCES` can be used to config the number of concurr
 instances). The default is 10, and the valid value is purposely limited to the range between 1 and 40. 
 
 Each Tor client attempts to build a new circuit (results in a new outbound IP address) every 30 seconds. Every 30 minutes, this image
-rebuild all the circuits. This interval can be changed with environment variable `TOR_REBUILD_INTERVAL`, the default value is 1800
+rebuilds all the circuits. This interval can be changed with environment variable `TOR_REBUILD_INTERVAL`, the default value is 1800
 seconds, while it can be set up any number greater than 600 seconds.
 
 ### Test the proxy
@@ -52,7 +52,7 @@ while :; do curl -sx localhost:3128 ifconfig.me; echo ""; sleep 2; done
 
 ## Credit
 
-At Github there are many repos build Docker image to provide HTTP proxy connects to the Tor network. The project is reinventing the wheel
+At Github, there are many repos build Docker image to provide HTTP proxy connects to the Tor network. The project is reinventing the wheel
 based on many of them.
 Remarkably:
 - [y4ns0l0/docker-multi-tor](https://github.com/y4ns0l0/docker-multi-tor) creates a setup with multiple pairs of Privoxy-Tor. Having no
