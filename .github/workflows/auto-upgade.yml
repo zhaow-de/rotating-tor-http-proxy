@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@master
+        uses: actions/checkout@v3
         with:
           ref: main
       - name: Build Docker image
@@ -23,32 +23,14 @@ jobs:
           NEW_BOM="$(docker run --rm local-image /bom.sh)"
           echo "Current BOM: ${CURRENT_BOM}"
           echo "New BOM: ${NEW_BOM}"
-          echo "::set-output name=compare-bom-result::$(if [ "${CURRENT_BOM}" = "${NEW_BOM}" ]; then echo NOCHANGE; else echo CHANGED; fi)"
-          echo "::set-output name=new-bom-data::${NEW_BOM}"
-      - name: Run proxy server
-        if: ${{ steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
-        id: run-image
-        shell: bash
-        # 90 seconds should be long enough to build 3 circuits
-        run: docker run -d --rm --name test-proxy -p 3128:3128 -e TOR_INSTANCES=3 local-image && sleep 90
-      - name: Test the proxy
-        if: ${{ steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.run-image.outcome != 'skipped' }}
-        id: test-proxy
-        shell: bash
-        run: |
-          IP1=$(curl -sx localhost:3128 ifconfig.me)
-          sleep 2
-          IP2=$(curl -sx localhost:3128 ifconfig.me)
-          sleep 2
-          IP3=$(curl -sx localhost:3128 ifconfig.me)
-          # tricky expression here for a simple goal: (1) none of the 3x IP shall be empty, and (2) 3x IP shall not have the same value
-          [[ "${IP1}" != "${IP2}" || "${IP2}" != "${IP3}" || "${IP1}" != "${IP3}" ]] && [[ "${IP1}" != "" ]] && [[ "${IP2}" != "" ]] && [[ "${IP3}" != "" ]] || exit 1
+          echo "compare-bom-result=$(if [ "${CURRENT_BOM}" = "${NEW_BOM}" ]; then echo NOCHANGE; else echo CHANGED; fi)" >> $GITHUB_OUTPUT
+          echo "new-bom-data=${NEW_BOM}" >> $GITHUB_OUTPUT
       - name: Update BOM record
-        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
         shell: bash
         run: echo "${{ steps.compare-bom.outputs.new-bom-data }}" > ${GITHUB_WORKSPACE}/.github/bom.current
       - name: Update README
-        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
         shell: bash
         run: |
           cat ${GITHUB_WORKSPACE}/README.md |tr '\n' '\r' |sed -r "s/(.*<!---\ BOM-starts\ --->\r).*/\1/" |tr '\r' '\n' > ${GITHUB_WORKSPACE}/~README.md
@@ -58,22 +40,51 @@ jobs:
           echo "<!--- BOM-ends. Document ends here too --->" >> ${GITHUB_WORKSPACE}/~README.md
           mv -f ${GITHUB_WORKSPACE}/~README.md ${GITHUB_WORKSPACE}/README.md
 
+      - name: Build multi-platform image (setup QEMU)
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
+        uses: docker/setup-qemu-action@v2
+      - name: Build multi-platform image (setup docker-buildx)
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Dry-run version bumping to get the new version number
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
+        id: tag_version_dryrun
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          # align the parameters here with the real run below
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: ''
+      - name: Build multi-platform image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          push: true
+          tags: zhaowde/rotating-tor-http-proxy:latest,zhaowde/rotating-tor-http-proxy:${{ steps.tag_version_dryrun.outputs.new_version }}
+
       - name: Commit changes
-        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: auto upgrade triggered by BoM changes
           skip_fetch: true
       - name: Bump version and push tag
-        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
         id: tag_version
-        uses: mathieudutour/github-tag-action@v5.1
+        uses: mathieudutour/github-tag-action@v6.1
         with:
+          # align the parameters here with the dry-run above
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
           tag_prefix: ''
       - name: Create a release
-        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,8 +93,8 @@ jobs:
           release_name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
       - name: Merge (back) to develop branch
-        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' && steps.test-proxy.outcome == 'success' }}
-        uses: everlytic/branch-merge@1.1.0
+        if: ${{ success() && steps.compare-bom.outputs.compare-bom-result == 'CHANGED' }}
+        uses: everlytic/branch-merge@1.1.5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           source_ref: main

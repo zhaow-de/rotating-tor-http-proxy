@@ -1,19 +1,25 @@
 ![GitHub](https://img.shields.io/github/license/zhaow-de/rotating-tor-http-proxy)
 ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/zhaowde/rotating-tor-http-proxy?sort=semver)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/zhaow-de/rotating-tor-http-proxy/auto-upgrade)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/zhaow-de/rotating-tor-http-proxy/auto-upgrade.yml?branch=main)
 [![Docker Pulls](https://img.shields.io/docker/pulls/zhaowde/rotating-tor-http-proxy.svg)](https://hub.docker.com/r/zhaowde/rotating-tor-http-proxy/)
 ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/zhaowde/rotating-tor-http-proxy?sort=semver)
 
 # rotating-tor-http-proxy
 
-This Docker image provides one HTTP proxy endpoint with many IP addresses for use scenarios like crawling.
+This Docker image provides one HTTP proxy endpoint with many IP addresses for use scenarios like web crawling.
 
-![Screenshot](images/screenshot_1.gif)
+![Screenshot](https://raw.githubusercontent.com/zhaow-de/rotating-tor-http-proxy/main/images/screenshot_1.gif)
 
 Behind the scene, it has an HAProxy sitting in front of multiple pairs of Privoxy-Tor. The HAProxy dispatches the incoming
 requests to the Privoxy instances with a round-robin strategy. 
 
 ## Usage
+
+This image is multi-platform enabled, currently supporting:
+- amd64 (x86_64)
+- arm64 (aarch64)
+- arm/v7 (armhf)
+- arm/v6 (armel)
 
 ### Simple case
 ```shell
