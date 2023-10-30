@@ -47,7 +47,7 @@ seconds, while it can be set up any number greater than 600 seconds.
 ### Test the proxy
 
 ```shell
-while :; do curl -sx localhost:3128 ifconfig.me; echo ""; sleep 2; done
+while :; do curl -sx localhost:3128 ifconfig.io; echo ""; sleep 2; done
 ```
 
 ## Credit

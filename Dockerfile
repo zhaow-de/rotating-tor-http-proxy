@@ -30,11 +30,9 @@ RUN apk --no-cache --no-progress --quiet upgrade && \
     # tor
     rm -rf /etc/tor/torrc.sample && \
     # privoxy
-    rm -rf /etc/privoxy/*.action /etc/privoxy/*.filter /etc/privoxy/trust /etc/logrotate.d/privoxy && \
+    rm -rf /etc/privoxy/*.new /etc/logrotate.d/privoxy && \
     # files like /etc/shadow-, /etc/passwd-
-    find / -xdev -type f -regex '.*-$' -exec rm -f {} + && \
-    # suid files
-    find / -xdev -type f -a -perm +4000 -delete && \
+    find / -xdev -type f -regex '.*-$' -exec rm -f {} \; && \
     # temp and cache
     rm -rf /var/cache/apk/* /usr/share/doc /usr/share/man/ /usr/share/info/* /var/cache/man/* /tmp/* /etc/fstab && \
     # init scripts
