@@ -70,7 +70,7 @@ Remarkably:
 - alpine-3.19.1
 - bash-5.2.21
 - curl-8.5.0
-- haproxy-2.8.7
+- haproxy-2.8.9
 - privoxy-3.0.34
 - sed-4.9
 - tor-0.4.8.10
