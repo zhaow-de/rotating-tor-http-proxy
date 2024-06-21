@@ -67,7 +67,7 @@ Remarkably:
 
 <!--- Do not manually modify anything below this line! --->
 <!--- BOM-starts --->
-- alpine-3.20.0
+- alpine-3.20.1
 - bash-5.2.26
 - curl-8.7.1
 - haproxy-2.8.10
