@@ -67,10 +67,10 @@ Remarkably:
 
 <!--- Do not manually modify anything below this line! --->
 <!--- BOM-starts --->
-- alpine-3.20.3
-- bash-5.2.26
+- alpine-3.21.0
+- bash-5.2.37
 - curl-8.11.0
-- haproxy-2.8.11
+- haproxy-3.0.6
 - privoxy-3.0.34
 - sed-4.9
 - tor-0.4.8.13
