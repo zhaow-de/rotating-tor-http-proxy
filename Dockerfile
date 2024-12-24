@@ -15,7 +15,7 @@ RUN apk --no-cache --no-progress --quiet upgrade && \
     apk --no-cache --no-progress --quiet add tor bash privoxy haproxy curl sed && \
     #
     # directories and files
-    mv /tor.cfg /etc/tor/torrc && \
+    mv /tor.cfg /etc/tor/torrc.default && \
     mv /privoxy.cfg /etc/privoxy/config.templ && \
     mv /haproxy.cfg /etc/haproxy/haproxy.cfg.default && \
     chmod +x /start.sh && \
@@ -40,4 +40,4 @@ RUN apk --no-cache --no-progress --quiet upgrade && \
     # kernel tunables
     rm -rf /etc/sysctl* /etc/modprobe.d /etc/modules /etc/mdev.conf /etc/acpi
 
-CMD /start.sh
+CMD ["/start.sh"]
