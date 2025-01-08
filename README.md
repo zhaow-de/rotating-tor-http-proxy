@@ -127,7 +127,7 @@ Remarkably:
 
 <!--- Do not manually modify anything below this line! --->
 <!--- BOM-starts --->
-- alpine-3.21.1
+- alpine-3.21.2
 - bash-5.2.37
 - curl-8.11.1
 - haproxy-3.0.7
