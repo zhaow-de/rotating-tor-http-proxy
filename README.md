@@ -129,7 +129,7 @@ Remarkably:
 <!--- BOM-starts --->
 - alpine-3.21.2
 - bash-5.2.37
-- curl-8.11.1
+- curl-8.12.1
 - haproxy-3.0.8
 - privoxy-3.0.34
 - sed-4.9
