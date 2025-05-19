@@ -40,4 +40,6 @@ RUN apk --no-cache --no-progress --quiet upgrade && \
     # kernel tunables
     rm -rf /etc/sysctl* /etc/modprobe.d /etc/modules /etc/mdev.conf /etc/acpi
 
+STOPSIGNAL SIGINT
+
 CMD ["/start.sh"]
