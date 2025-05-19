@@ -20,10 +20,24 @@ RUN apk --no-cache --no-progress --quiet upgrade && \
     mv /haproxy.cfg /etc/haproxy/haproxy.cfg.default && \
     chmod +x /start.sh && \
     chmod +x /bom.sh && \
+    #
+    # prepare for low-privilege execution \
+    addgroup proxy && \
+    adduser -S -D -u 1000 -G proxy proxy && \
+    touch /etc/haproxy/haproxy.cfg && \
+    chown -R proxy: /etc/haproxy/ && \
+    mkdir -p /var/lib/haproxy && \
+    chown -R proxy: /var/lib/haproxy && \
+    mkdir -p /var/local/haproxy && \
+    chown -R proxy: /var/local/haproxy && \
+    touch /etc/tor/torrc && \
+    chown -R proxy: /etc/tor/ && \
+    chown -R proxy: /etc/privoxy/ && \
     mkdir -p /var/local/tor && \
-    chown -R tor: /var/local/tor && \
+    chown -R proxy: /var/local/tor && \
     mkdir -p /var/local/privoxy && \
-    chown -R privoxy: /var/local/privoxy && \
+    chown -R proxy: /var/local/privoxy && \
+    chown -R proxy: /var/log/privoxy && \
     #
     # cleanup
     #
@@ -39,5 +53,9 @@ RUN apk --no-cache --no-progress --quiet upgrade && \
     rm -rf /etc/init.d /lib/rc /etc/conf.d /etc/inittab /etc/runlevels /etc/rc.conf && \
     # kernel tunables
     rm -rf /etc/sysctl* /etc/modprobe.d /etc/modules /etc/mdev.conf /etc/acpi
+
+STOPSIGNAL SIGINT
+
+USER proxy
 
 CMD ["/start.sh"]

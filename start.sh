@@ -65,7 +65,7 @@ for ((i = 0; i < TOR_INSTANCES; i++)); do
     socks_port=$((base_tor_socks_port + i))
     ctrl_port=$((base_tor_ctrl_port + i))
     tor_data_dir="/var/local/tor/${i}"
-    mkdir -p "${tor_data_dir}" && chmod -R 700 "${tor_data_dir}" && chown -R tor: "${tor_data_dir}"
+    mkdir -p "${tor_data_dir}" && chmod -R 700 "${tor_data_dir}" && chown -R proxy: "${tor_data_dir}"
     # spawn a child process to run the tor server at foreground so that logging to stdout is possible
     (tor --PidFile "${tor_data_dir}/tor.pid" \
       --SocksPort 127.0.0.1:"${socks_port}" \
@@ -77,7 +77,7 @@ for ((i = 0; i < TOR_INSTANCES; i++)); do
     #
     http_port=$((base_http_port + i))
     privoxy_data_dir="/var/local/privoxy/${i}"
-    mkdir -p "${privoxy_data_dir}" && chown -R privoxy: "${privoxy_data_dir}"
+    mkdir -p "${privoxy_data_dir}" && chown -R proxy: "${privoxy_data_dir}"
     cp /etc/privoxy/config.templ "${privoxy_data_dir}/config"
     sed -i \
       -e 's@PLACEHOLDER_CONFDIR@'"${privoxy_data_dir}"'@g' \
@@ -87,7 +87,6 @@ for ((i = 0; i < TOR_INSTANCES; i++)); do
     # spawn a child process
     (privoxy \
       --no-daemon \
-      --user privoxy \
       --pidfile "${privoxy_data_dir}/privoxy.pid" \
       "${privoxy_data_dir}/config" 2>&1 |
       sed -r "s/^([0-9\-]+\ [0-9:\.]+\ [0-9a-f]+\ )([^:]+):\ (.*)[\r\n]?$/$(date -u +"%Y-%m-%dT%H:%M:%SZ") [privoxy#${i}] [\L\2] \E\3/") &
