@@ -133,5 +133,5 @@ Remarkably:
 - haproxy-3.2.1
 - privoxy-3.0.34
 - sed-4.9
-- tor-0.4.8.16
+- tor-0.4.8.17
 <!--- BOM-ends. Document ends here too --->
