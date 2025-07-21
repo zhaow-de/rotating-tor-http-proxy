@@ -130,7 +130,7 @@ Remarkably:
 - alpine-3.22.1
 - bash-5.2.37
 - curl-8.14.1
-- haproxy-3.2.2
+- haproxy-3.2.3
 - privoxy-3.0.34
 - sed-4.9
 - tor-0.4.8.17
