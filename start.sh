@@ -59,6 +59,7 @@ if [[ -n $TOR_EXIT_COUNTRY ]]; then
 fi
 
 for ((i = 0; i < TOR_INSTANCES; i++)); do
+    idx=$((i + 1))
     #
     # start one tor instance
     #
@@ -71,7 +72,7 @@ for ((i = 0; i < TOR_INSTANCES; i++)); do
       --SocksPort 127.0.0.1:"${socks_port}" \
       --ControlPort 127.0.0.1:"${ctrl_port}" \
       --dataDirectory "${tor_data_dir}" 2>&1 |
-      sed -r "s/^(\w+\ [0-9 :\.]+)(\[.*)[\r\n]?$/$(date -u +"%Y-%m-%dT%H:%M:%SZ") [tor#${i}] \2/") &
+      sed -r "s/^(\w+\ [0-9 :\.]+)(\[.*)[\r\n]?$/$(date -u +"%Y-%m-%dT%H:%M:%SZ") [tor#${idx}] \2/") &
     #
     # start one privoxy instance connecting to the tor socks
     #
@@ -89,7 +90,7 @@ for ((i = 0; i < TOR_INSTANCES; i++)); do
       --no-daemon \
       --pidfile "${privoxy_data_dir}/privoxy.pid" \
       "${privoxy_data_dir}/config" 2>&1 |
-      sed -r "s/^([0-9\-]+\ [0-9:\.]+\ [0-9a-f]+\ )([^:]+):\ (.*)[\r\n]?$/$(date -u +"%Y-%m-%dT%H:%M:%SZ") [privoxy#${i}] [\L\2] \E\3/") &
+      sed -r "s/^([0-9\-]+\ [0-9:\.]+\ [0-9a-f]+\ )([^:]+):\ (.*)[\r\n]?$/$(date -u +"%Y-%m-%dT%H:%M:%SZ") [privoxy#${idx}] [\L\2] \E\3/") &
     #
     # "register" the privoxy instance to haproxy
     #
@@ -109,12 +110,13 @@ curl -sx "http://127.0.0.1:3128" https://www.apple.com >/dev/null
 # endless loop to reset circuits
 #
 while :; do
+    idx=$((i + 1))
     log "Wait ${TOR_REBUILD_INTERVAL} seconds to rebuild all the tor circuits"
     sleep "$((TOR_REBUILD_INTERVAL))"
     log "Rebuilding all the tor circuits..."
     for ((i = 0; i < TOR_INSTANCES; i++)); do
         http_port=$((base_http_port + i))
         IP=$(curl -sx "http://127.0.0.1:${http_port}" http://checkip.amazonaws.com)
-        log "Current external IP address of proxy #${i}/${TOR_INSTANCES}: ${IP}"
+        log "Current external IP address of proxy #${idx}/${TOR_INSTANCES}: ${IP}"
     done
 done
