@@ -127,10 +127,10 @@ Remarkably:
 
 <!--- Do not manually modify anything below this line! --->
 <!--- BOM-starts --->
-- alpine-3.23.4
-- bash-5.3.3
-- curl-8.19.0
-- haproxy-3.2.19
+- alpine-3.24.0
+- bash-5.3.9
+- curl-8.20.0
+- haproxy-3.4.0
 - privoxy-4.0.0
 - sed-4.9
 - tor-0.4.9.9
