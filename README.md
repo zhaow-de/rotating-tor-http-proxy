@@ -129,8 +129,8 @@ Remarkably:
 <!--- BOM-starts --->
 - alpine-3.24.1
 - bash-5.3.9
-- curl-8.20.0
-- haproxy-3.4.0
+- curl-8.21.0
+- haproxy-3.4.1
 - privoxy-4.0.0
 - sed-4.9
 - tor-0.4.9.11
